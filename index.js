@@ -51,6 +51,16 @@ app.post("/AddService", async (req, res) => {
   const response = await service.insertOne(serviceData);
   res.send(response);
 });
+app.get("/AddService/:email", async (req, res) => {
+  const email = req.params.email;
+  console.log(email);
+  try {
+    const response = await service.find({ "Provider_info.email": email }).toArray();
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+});
 app.get("/AddService/:id", async (req, res) => {
   const id = req.params.id;
   try {
