@@ -73,6 +73,16 @@ app.patch("/AddService/:id", async (req, res) => {
     res.send(err);
   }
 });
+app.get("/booked_service/:email", async (req, res) => {
+  const email = req.params.email;
+  
+  try {
+    const response = await orderedService.find({ email: email }).toArray();
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+});
 
 app.listen(port, (req, res) => {
   console.log(`Server running on port ${port}`);
