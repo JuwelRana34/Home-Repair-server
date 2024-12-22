@@ -47,6 +47,7 @@ app.get("/", async (req, res) => {
 });
 app.post("/AddService", async (req, res) => {
   const serviceData = req.body;
+
   const response = await service.insertOne(serviceData);
   res.send(response);
 });
@@ -84,7 +85,7 @@ app.patch("/AddService/:id", async (req, res) => {
 });
 app.get("/booked_service/:email", async (req, res) => {
   const email = req.params.email;
-  
+
   try {
     const response = await orderedService.find({ email: email }).toArray();
     res.send(response);
@@ -94,24 +95,46 @@ app.get("/booked_service/:email", async (req, res) => {
 });
 app.get("/service_To_Do/:email", async (req, res) => {
   const email = req.params.email;
-  
+
   try {
-    const response = await orderedService.find({ 
-      providerEmail: email }).toArray();
+    const response = await orderedService
+      .find({
+        providerEmail: email,
+      })
+      .toArray();
     res.send(response);
   } catch (err) {
     res.send(err);
   }
 });
-app.post("/booked_service", async (req, res) => {
-  const booked_Data = req.body;
-  
+app.patch("/service_To_Do/:status/:id", async (req, res) => {
+  const status = req.params.status;
+  const id = req.params.id;
+
   try {
-     const response = await orderedService.insertOne(booked_Data);
+    const response = await orderedService.updateOne(
+      {
+        _id: new ObjectId(id),
+      },
+      { $set: { status: status } }
+    );
+    console.log(response);
     res.send(response);
   } catch (err) {
     res.send(err);
   }
+});
+
+app.post("/booked_service", async (req, res) => {
+  const booked_Data = req.body;
+
+  try {
+    const response = await orderedService.insertOne(booked_Data);
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+  res.send(booked_Data);
 });
 
 app.listen(port, (req, res) => {
