@@ -58,8 +58,17 @@ app.get("/", async(req, res) => {
 app.post("/AddService", async(req, res) => {
   const  serviceData = req.body
     const response = await service.insertOne(serviceData)
-    console.log(serviceData)
     res.send(response);
+})
+app.delete("/AddService/:id", async(req, res) => {
+  const  id = req.params.id
+  try{
+    const response = await service.deleteOne({_id: new ObjectId(id)})
+    res.send(response);
+  }catch(err){
+    res.send(err)
+  }
+    
 })
 
 
