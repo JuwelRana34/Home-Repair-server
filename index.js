@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 
 const database = client.db("services");
 const service = database.collection("service");
-const orderedService = database.collection("service");
+const orderedService = database.collection("booked_Service");
 
 async function run() {
   try {
@@ -78,6 +78,16 @@ app.get("/booked_service/:email", async (req, res) => {
   
   try {
     const response = await orderedService.find({ email: email }).toArray();
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+});
+app.post("/booked_service", async (req, res) => {
+  const booked_Data = req.body;
+  
+  try {
+     const response = await orderedService.insertOne(booked_Data);
     res.send(response);
   } catch (err) {
     res.send(err);
