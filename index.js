@@ -92,6 +92,17 @@ app.get("/booked_service/:email", async (req, res) => {
     res.send(err);
   }
 });
+app.get("/service_To_Do/:email", async (req, res) => {
+  const email = req.params.email;
+  
+  try {
+    const response = await orderedService.find({ 
+      providerEmail: email }).toArray();
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+});
 app.post("/booked_service", async (req, res) => {
   const booked_Data = req.body;
   
