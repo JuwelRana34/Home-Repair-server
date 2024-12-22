@@ -25,8 +25,9 @@ const client = new MongoClient(uri, {
     },
   });
 
-  const database = client.db("juwelrana");
-  const collection = database.collection("students");
+  const database = client.db("services");
+  const service = database.collection("service");
+  const orderedService = database.collection("service");
   
 
     
@@ -51,7 +52,13 @@ const client = new MongoClient(uri, {
 
 // routes
 app.get("/", async(req, res) => {
-    const response = await collection.find().toArray()
+    const response = await service.find().toArray()
+    res.send(response);
+})
+app.post("/AddService", async(req, res) => {
+  const  serviceData = req.body
+    const response = await service.insertOne(serviceData)
+    console.log(serviceData)
     res.send(response);
 })
 
