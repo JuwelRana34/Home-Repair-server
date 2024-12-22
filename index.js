@@ -1,82 +1,79 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
-//  middleware 
-app.use(cors(
-   
-));
+//  middleware
+app.use(cors());
 app.use(express.json());
-require('dotenv').config()
+require("dotenv").config();
 
-
-// database setup 
+// database setup
 // const uri =`mongodb+srv://${process.env.DB_UserName}:${process.env.DB_Pass}@cluster0.ocbhdf0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-const uri =`mongodb://localhost:27017`;
+const uri = `mongodb://localhost:27017`;
 
- // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
-  });
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
-  const database = client.db("services");
-  const service = database.collection("service");
-  const orderedService = database.collection("service");
-  
+const database = client.db("services");
+const service = database.collection("service");
+const orderedService = database.collection("service");
 
-    
-
-  async function run() {
-    try {
-      // Connect the client to the server	(optional starting in v4.7)
-      // await client.connect();
-      // Send a ping to confirm a successful connection
-      // await database.command({ ping: 1 });
-      console.log(
-        "********successfully connected to MongoDB!******"
-      );
-    } finally {
-      // Ensures that the client will close when you finish/error
-      // await client.close();
-    }
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    // await client.connect();
+    // Send a ping to confirm a successful connection
+    // await database.command({ ping: 1 });
+    console.log("********successfully connected to MongoDB!******");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    // await client.close();
   }
-  run().catch(console.dir);
-
- 
+}
+run().catch(console.dir);
 
 // routes
-app.get("/", async(req, res) => {
-    const response = await service.find().toArray()
+app.get("/", async (req, res) => {
+  const response = await service.find().toArray();
+  res.send(response);
+});
+app.post("/AddService", async (req, res) => {
+  const serviceData = req.body;
+  const response = await service.insertOne(serviceData);
+  res.send(response);
+});
+app.delete("/AddService/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const response = await service.deleteOne({ _id: new ObjectId(id) });
     res.send(response);
-})
-app.post("/AddService", async(req, res) => {
-  const  serviceData = req.body
-    const response = await service.insertOne(serviceData)
-    res.send(response);
-})
-app.delete("/AddService/:id", async(req, res) => {
-  const  id = req.params.id
-  try{
-    const response = await service.deleteOne({_id: new ObjectId(id)})
-    res.send(response);
-  }catch(err){
-    res.send(err)
+  } catch (err) {
+    res.send(err);
   }
-    
-})
+});
 
-
-
-
-
-
+app.patch("/AddService/:id", async (req, res) => {
+  const id = req.params.id;
+  const serviceData = req.body;
+  try {
+    const response = await service.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: serviceData }
+    );
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+});
 
 app.listen(port, (req, res) => {
-    console.log(`Server running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
