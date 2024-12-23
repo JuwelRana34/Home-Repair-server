@@ -5,7 +5,12 @@ const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //  middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://homere-paire.web.app"],
+    withCredentials: true,
+  })
+);
 app.use(express.json());
 require("dotenv").config();
 
@@ -53,16 +58,18 @@ app.post("/AddService", async (req, res) => {
 });
 app.get("/AddService/:email", async (req, res) => {
   const email = req.params.email;
-  console.log(email);
   try {
-    const response = await service.find({ "Provider_info.email": email }).toArray();
+    const response = await service
+      .find({ "Provider_info.email": email })
+      .toArray();
     res.send(response);
   } catch (err) {
     res.send(err);
   }
 });
-app.get("/AddService/:id", async (req, res) => {
+app.get("/AddService/details/:id", async (req, res) => {
   const id = req.params.id;
+
   try {
     const response = await service.findOne({ _id: new ObjectId(id) });
     res.send(response);
@@ -97,7 +104,11 @@ app.get("/booked_service/:email", async (req, res) => {
   const email = req.params.email;
 
   try {
-    const response = await orderedService.find({ email: email }).toArray();
+    const response = await orderedService
+      .find({
+        customer_email: email,
+      })
+      .toArray();
     res.send(response);
   } catch (err) {
     res.send(err);
@@ -109,9 +120,9 @@ app.get("/service_To_Do/:email", async (req, res) => {
   try {
     const response = await orderedService
       .find({
-        providerEmail: email,
-      })
-      .toArray();
+        Provider_email: email,
+      }).toArray();
+      
     res.send(response);
   } catch (err) {
     res.send(err);
@@ -120,6 +131,7 @@ app.get("/service_To_Do/:email", async (req, res) => {
 app.patch("/service_To_Do/:status/:id", async (req, res) => {
   const status = req.params.status;
   const id = req.params.id;
+  console.log(status, id);
 
   try {
     const response = await orderedService.updateOne(
@@ -128,7 +140,7 @@ app.patch("/service_To_Do/:status/:id", async (req, res) => {
       },
       { $set: { status: status } }
     );
-    console.log(response);
+
     res.send(response);
   } catch (err) {
     res.send(err);
@@ -144,7 +156,7 @@ app.post("/booked_service", async (req, res) => {
   } catch (err) {
     res.send(err);
   }
-  res.send(booked_Data);
+
 });
 
 app.listen(port, (req, res) => {
