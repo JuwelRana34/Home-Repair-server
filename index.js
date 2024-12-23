@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+let jwt = require("jsonwebtoken");
+var cookieParser = require("cookie-parser");
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -8,10 +10,11 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://homere-paire.web.app"],
-    withCredentials: true,
+    credentials: true,
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 require("dotenv").config();
 
 // database setup
@@ -37,7 +40,7 @@ async function run() {
     // await client.connect();
     // Send a ping to confirm a successful connection
     // await database.command({ ping: 1 });
-    console.log("********successfully connected to MongoDB!******");
+    // console.log("********successfully connected to MongoDB!******");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -46,8 +49,51 @@ async function run() {
 run().catch(console.dir);
 
 // routes
+
+app.post("/jwt", (req, res) => {
+  const playload = req.body;
+  let token = jwt.sign(playload, process.env.jwt_secret, { expiresIn: "1d" });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  });
+  res.send({ success: true });
+});
+
+const verifyToken =(req, res, next) => {
+  let token = req.cookies?.token;
+  if (!token) {
+    return res.status(403).send({message:" unauthorized access"});
+  }
+  jwt.verify(token, process.env.jwt_secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message:" unauthorized access" });
+    }
+    
+    req.email = decoded.email;
+    next();
+  });
+}
+
+app.post('/logOut', (req, res) => {
+
+  res.clearCookie('token',{
+    maxAge: 0,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+  }).send({ success: true})
+})
+
+
 app.get("/", async (req, res) => {
-  const response = await service.find().toArray();
+  const searchText = req.query.filter
+  let filter = {}
+  if (searchText) {
+    filter.Service_Name= { $regex: searchText, $options: "i" }}
+     
+  
+  const response = await service.find(filter).toArray();
   res.send(response);
 });
 app.post("/AddService", async (req, res) => {
@@ -56,8 +102,10 @@ app.post("/AddService", async (req, res) => {
   const response = await service.insertOne(serviceData);
   res.send(response);
 });
-app.get("/AddService/:email", async (req, res) => {
+app.get("/AddService/:email",verifyToken, async (req, res) => {
   const email = req.params.email;
+  if (req.email !== email) {
+    return res.status(403).send({ message: "unauthorized access" })}
   try {
     const response = await service
       .find({ "Provider_info.email": email })
@@ -100,8 +148,12 @@ app.patch("/AddService/:id", async (req, res) => {
     res.send(err);
   }
 });
-app.get("/booked_service/:email", async (req, res) => {
+app.get("/booked_service/:email",verifyToken, async (req, res) => {
   const email = req.params.email;
+
+  if (req.email !== email) {
+    return res.status(403).send({ message: "unauthorized access" });
+  }
 
   try {
     const response = await orderedService
@@ -114,8 +166,11 @@ app.get("/booked_service/:email", async (req, res) => {
     res.send(err);
   }
 });
-app.get("/service_To_Do/:email", async (req, res) => {
+app.get("/service_To_Do/:email",verifyToken, async (req, res) => {
   const email = req.params.email;
+  if (req.email !== email) {
+    return res.status(403).send({ message: "unauthorized access" });
+  }
 
   try {
     const response = await orderedService
