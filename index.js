@@ -86,6 +86,11 @@ app.post('/logOut', (req, res) => {
 })
 
 
+app.get("/services/popular", async (req, res) => {
+
+ const response = await service.find().sort({"price":-1}).limit(6).toArray();
+  res.send(response);
+});
 app.get("/", async (req, res) => {
 
   const searchText = req.query.filter
@@ -97,6 +102,7 @@ app.get("/", async (req, res) => {
   const response = await service.find(filter).toArray();
   res.send(response);
 });
+
 app.post("/AddService", verifyToken, async (req, res) => {
   if (!req.email) {
     return res.status(403).send({ message: "unauthorized access" })}
@@ -192,7 +198,6 @@ app.get("/service_To_Do/:email",verifyToken, async (req, res) => {
 app.patch("/service_To_Do/:status/:id", async (req, res) => {
   const status = req.params.status;
   const id = req.params.id;
-  console.log(status, id);
 
   try {
     const response = await orderedService.updateOne(
