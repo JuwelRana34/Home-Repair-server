@@ -87,6 +87,7 @@ app.post('/logOut', (req, res) => {
 
 
 app.get("/", async (req, res) => {
+
   const searchText = req.query.filter
   let filter = {}
   if (searchText) {
@@ -96,7 +97,9 @@ app.get("/", async (req, res) => {
   const response = await service.find(filter).toArray();
   res.send(response);
 });
-app.post("/AddService", async (req, res) => {
+app.post("/AddService", verifyToken, async (req, res) => {
+  if (!req.email) {
+    return res.status(403).send({ message: "unauthorized access" })}
   const serviceData = req.body;
 
   const response = await service.insertOne(serviceData);
@@ -115,7 +118,10 @@ app.get("/AddService/:email",verifyToken, async (req, res) => {
     res.send(err);
   }
 });
-app.get("/AddService/details/:id", async (req, res) => {
+app.get("/AddService/details/:id", verifyToken, async (req, res) => {
+  if (!req.email) {
+    return res.status(403).send({ message: "unauthorized access" });
+  }
   const id = req.params.id;
 
   try {
