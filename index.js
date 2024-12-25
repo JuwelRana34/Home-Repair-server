@@ -9,7 +9,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //  middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://homere-paire.web.app"],
+    origin: ["https://homere-paire.web.app",'https://home-repairbd.netlify.app/'],
     credentials: true,
   })
 );
@@ -18,8 +18,7 @@ app.use(cookieParser());
 require("dotenv").config();
 
 // database setup
-// const uri =`mongodb+srv://${process.env.DB_UserName}:${process.env.DB_Pass}@cluster0.ocbhdf0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-const uri = `mongodb://localhost:27017`;
+const uri = `mongodb+srv://${process.env.DB_UserName}:${process.env.DB_Pass}@cluster0.ocbhdf0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -61,60 +60,60 @@ app.post("/jwt", (req, res) => {
   res.send({ success: true });
 });
 
-const verifyToken =(req, res, next) => {
+const verifyToken = (req, res, next) => {
   let token = req.cookies?.token;
   if (!token) {
-    return res.status(403).send({message:" unauthorized access"});
+    return res.status(403).send({ message: " unauthorized access" });
   }
   jwt.verify(token, process.env.jwt_secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message:" unauthorized access" });
+      return res.status(401).send({ message: " unauthorized access" });
     }
-    
+
     req.email = decoded.email;
     next();
   });
-}
+};
 
-app.post('/logOut', (req, res) => {
-
-  res.clearCookie('token',{
-    maxAge: 0,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-  }).send({ success: true})
-})
-
+app.post("/logOut", (req, res) => {
+  res
+    .clearCookie("token", {
+      maxAge: 0,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    })
+    .send({ success: true });
+});
 
 app.get("/services/popular", async (req, res) => {
-
- const response = await service.find().sort({"price":-1}).limit(6).toArray();
+  const response = await service.find().sort({ price: -1 }).limit(6).toArray();
   res.send(response);
 });
 app.get("/", async (req, res) => {
-
-  const searchText = req.query.filter
-  let filter = {}
+  const searchText = req.query.filter;
+  let filter = {};
   if (searchText) {
-    filter.Service_Name= { $regex: searchText, $options: "i" }}
-     
-  
+    filter.Service_Name = { $regex: searchText, $options: "i" };
+  }
+
   const response = await service.find(filter).toArray();
   res.send(response);
 });
 
 app.post("/AddService", verifyToken, async (req, res) => {
   if (!req.email) {
-    return res.status(403).send({ message: "unauthorized access" })}
+    return res.status(403).send({ message: "unauthorized access" });
+  }
   const serviceData = req.body;
 
   const response = await service.insertOne(serviceData);
   res.send(response);
 });
-app.get("/AddService/:email",verifyToken, async (req, res) => {
+app.get("/AddService/:email", verifyToken, async (req, res) => {
   const email = req.params.email;
   if (req.email !== email) {
-    return res.status(403).send({ message: "unauthorized access" })}
+    return res.status(403).send({ message: "unauthorized access" });
+  }
   try {
     const response = await service
       .find({ "Provider_info.email": email })
@@ -149,6 +148,7 @@ app.delete("/AddService/:id", async (req, res) => {
 
 app.patch("/AddService/:id", async (req, res) => {
   const id = req.params.id;
+
   const serviceData = req.body;
   try {
     const response = await service.updateOne(
@@ -160,7 +160,7 @@ app.patch("/AddService/:id", async (req, res) => {
     res.send(err);
   }
 });
-app.get("/booked_service/:email",verifyToken, async (req, res) => {
+app.get("/booked_service/:email", verifyToken, async (req, res) => {
   const email = req.params.email;
 
   if (req.email !== email) {
@@ -178,7 +178,7 @@ app.get("/booked_service/:email",verifyToken, async (req, res) => {
     res.send(err);
   }
 });
-app.get("/service_To_Do/:email",verifyToken, async (req, res) => {
+app.get("/service_To_Do/:email", verifyToken, async (req, res) => {
   const email = req.params.email;
   if (req.email !== email) {
     return res.status(403).send({ message: "unauthorized access" });
@@ -188,8 +188,9 @@ app.get("/service_To_Do/:email",verifyToken, async (req, res) => {
     const response = await orderedService
       .find({
         Provider_email: email,
-      }).toArray();
-      
+      })
+      .toArray();
+
     res.send(response);
   } catch (err) {
     res.send(err);
@@ -222,7 +223,6 @@ app.post("/booked_service", async (req, res) => {
   } catch (err) {
     res.send(err);
   }
-
 });
 
 app.listen(port, (req, res) => {
