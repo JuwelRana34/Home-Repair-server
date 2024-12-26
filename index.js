@@ -9,7 +9,10 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //  middleware
 app.use(
   cors({
-    origin: ["https://homere-paire.web.app",'https://home-repairbd.netlify.app/'],
+    origin: [
+      "https://homere-paire.web.app",
+      "https://home-repairbd.netlify.app",
+    ],
     credentials: true,
   })
 );
