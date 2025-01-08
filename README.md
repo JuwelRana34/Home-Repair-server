@@ -36,6 +36,23 @@ Frontend: [https://homere-paire.web.app](https://homere-paire.web.app)
 
 ---
 
+---
+# Dependencies
+##This project uses the following dependencies:
+
+```bash
+"dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.11.0"
+  }
+
+```
+---
+
 ## Follow these steps to set up and run the project locally.
 
 ---
