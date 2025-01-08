@@ -38,7 +38,7 @@ Frontend: [https://homere-paire.web.app](https://homere-paire.web.app)
 
 ---
 # Dependencies
-##This project uses the following dependencies:
+## This project uses the following dependencies:
 
 ```bash
 "dependencies": {
