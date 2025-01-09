@@ -10,6 +10,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 app.use(
   cors({
     origin: [
+      "http://localhost:5173",
       "https://homere-paire.web.app",
       "https://home-repairbd.netlify.app",
     ],
@@ -94,12 +95,18 @@ app.get("/services/popular", async (req, res) => {
 });
 app.get("/", async (req, res) => {
   const searchText = req.query.filter;
+  let { sort } = req.query;
+
   let filter = {};
   if (searchText) {
     filter.Service_Name = { $regex: searchText, $options: "i" };
   }
+  let sortbyprice = {};
+  if (sort) {
+    sortbyprice = { price: sort === "asc" ? 1 : -1 };
+  }
 
-  const response = await service.find(filter).toArray();
+  const response = await service.find(filter).sort(sortbyprice).toArray();
   res.send(response);
 });
 
