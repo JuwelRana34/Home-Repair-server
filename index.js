@@ -89,7 +89,7 @@ app.post("/logOut", (req, res) => {
 });
 
 app.get("/services/popular", async (req, res) => {
-  const response = await service.find().sort({ price: -1 }).limit(6).toArray();
+  const response = await service.find().sort({ price: -1 }).limit(8).toArray();
   res.send(response);
 });
 app.get("/", async (req, res) => {
